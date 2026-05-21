@@ -1,0 +1,9 @@
+# DATABASE 
+MONGODB_DB = ""
+MONGO_PASS =""
+MONGODB_URI = ""
+TEMP_DIR = "/tmp"
+
+# Firebase
+FIREBASE = ''
+FIREBASE_PROJECT_ID = ''
