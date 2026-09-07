@@ -1,18 +1,5 @@
 "use client";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Editor, loader } from "@monaco-editor/react";
 import React, { useState } from "react";
-loader.config({
-  paths: {
-    vs: "/monaco/vs",
-  },
-});
 import { Maximize2, Minimize2 } from "lucide-react";
 
 export const languages = [
@@ -52,41 +39,26 @@ interface ShowTextProps {
   language: string;
 }
 const ShowText = ({ text, language }: ShowTextProps) => {
-  const [theLang, setLanguage] = useState(language);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const lines = text.split("\n");
 
   return (
     <div
-      className={`w-screen min-h-screen  flex flex-col items-stretch justify-start p-0 m-0${isFullscreen ? " fixed inset-0 z-50" : ""}`}
+      className={`w-screen min-h-screen flex flex-col items-stretch justify-start p-0 m-0${isFullscreen ? " fixed inset-0 z-50 bg-white" : ""}`}
       style={isFullscreen ? { width: "100vw", height: "100vh" } : {}}
       id="show-text"
     >
       <div
-        className="flex items-center justify-between w-full px-2 py-1  "
+        className="flex items-center justify-between w-full px-2 py-1 border-b"
         style={{ minHeight: 36 }}
       >
-        <span className="text-xs   font-semibold tracking-tight">
+        <span className="text-xs font-semibold tracking-tight">
           View Text
         </span>
         <div className="flex items-center gap-2">
-          {!isFullscreen && (
-            <Select value={theLang} onValueChange={setLanguage}>
-              <SelectTrigger className="h-6 min-w-[90px] px-2 text-xs rounded-sm focus:ring-0 focus:border-blue-500">
-                <SelectValue placeholder="Language" />
-              </SelectTrigger>
-              <SelectContent className="  max-h-44 overflow-y-auto rounded-sm shadow-lg">
-                {languages.map((language) => (
-                  <SelectItem
-                    key={language.value}
-                    value={language.value}
-                    className="text-xs px-2 py-1 "
-                  >
-                    {language.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <span className="text-[10px] text-neutral-400 uppercase">
+            {language}
+          </span>
           <button
             aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
             onClick={() => {
@@ -97,7 +69,7 @@ const ShowText = ({ text, language }: ShowTextProps) => {
               }
               setIsFullscreen(!isFullscreen);
             }}
-            className="ml-2 p-1 rounded hover:bg-neutral-800 transition-colors"
+            className="ml-2 p-1 rounded hover:bg-neutral-100 transition-colors"
             style={{
               height: 24,
               width: 24,
@@ -108,44 +80,27 @@ const ShowText = ({ text, language }: ShowTextProps) => {
             type="button"
           >
             {isFullscreen ? (
-              <Minimize2 className="w-4 h-4 text-neutral-300" />
+              <Minimize2 className="w-4 h-4 text-neutral-600" />
             ) : (
-              <Maximize2 className="w-4 h-4 text-neutral-300" />
+              <Maximize2 className="w-4 h-4 text-neutral-600" />
             )}
           </button>
         </div>
       </div>
-      <div className="flex-1 w-full">
-        <Editor
-          height={isFullscreen ? "calc(100vh - 36px)" : "calc(100vh - 36px)"}
-          width={isFullscreen ? "100vw" : "100vw"}
-          value={text}
-          language={theLang}
-          theme="vs-light"
-          loading="Loading Monaco Editor..."
-          options={{
-            readOnly: true,
-            fontSize: 13,
-            minimap: { enabled: false },
-            lineNumbersMinChars: 2,
-            padding: { top: 6, bottom: 6 },
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-              vertical: "hidden",
-              horizontal: "hidden",
-            },
-
-            scrollBeyondLastLine: false,
-            overviewRulerLanes: 0,
-            renderLineHighlight: "none",
-            lineDecorationsWidth: 2,
-            lineNumbers: "on",
-            wordWrap: "on",
-            folding: false,
-            tabSize: 2,
-            automaticLayout: true,
-          }}
-        />
+      <div
+        className="flex-1 w-full overflow-auto"
+        style={{ height: isFullscreen ? "calc(100vh - 36px)" : "calc(100vh - 36px)" }}
+      >
+        <pre className="m-0 p-4 text-[13px] leading-5 font-mono whitespace-pre-wrap break-words">
+          {lines.map((line, i) => (
+            <div key={i} className="flex">
+              <span className="select-none text-neutral-300 text-right pr-4 w-10 shrink-0">
+                {i + 1}
+              </span>
+              <span>{line}</span>
+            </div>
+          ))}
+        </pre>
       </div>
     </div>
   );
