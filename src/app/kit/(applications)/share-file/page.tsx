@@ -1,8 +1,7 @@
 'use client'
 import React, { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ClipboardCheck, FileText, Loader2, Save } from 'lucide-react'
+import { ClipboardCheck, FileText, Loader2, Save, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { QRCodeCanvas } from 'qrcode.react'
 import KitLayout from '@/components/KitLayout'
@@ -38,195 +37,154 @@ const Page = () => {
     }
   }
 
-  // For SSR/CSR compatibility
-  const getShareUrl = (id: number) => {
+  const getShareUrl = (shareId: number) => {
     if (typeof window !== 'undefined') {
-      return `${window.location.origin}/t/${id}`
+      return `${window.location.origin}/t/${shareId}`
     }
-    return `/t/${id}`
+    return `/t/${shareId}`
   }
 
   return (
-    <KitLayout title="Share File" description="Upload and share your file with a link that expires in 72 hours" category="General Kit">
-      {/* Main Card */}
-      <Card className="bg-white border border-slate-200 shadow-lg rounded-lg">
-        <CardHeader className="pb-2 flex flex-row items-center justify-between px-3 pt-3">
-          <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900">
-            <span className="p-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-md">
-              <ClipboardCheck className="h-3.5 w-3.5 text-white" />
-            </span>
-            <span className="text-sm">Upload File</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 pt-1">
-          {id ? (
-            <div className="flex flex-col items-center gap-1 text-xs text-slate-900 bg-white rounded-md border border-slate-200 px-4 py-3 shadow-sm">
-              <span className="mb-0.5 text-slate-600">Your text is saved at:</span>
-              <a
-                href={`/t/${id}`}
-                className="text-blue-700 hover:underline break-all font-mono text-[13px] px-2 py-1 rounded bg-white border border-slate-200 transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ wordBreak: 'break-all' }}
-              >
-                {getShareUrl(id)}
-              </a>
-              <span className="text-[11px] text-slate-500 mt-0.5">Will expire in 72 hours</span>
-              <div className="flex gap-1 mt-2">
-                <Button
-                  size="sm"
-                  className="h-6 px-2 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-sm shadow-none"
-                  onClick={() => {
-                    navigator.clipboard.writeText(getShareUrl(id))
-                    toast.success('Link copied to clipboard')
-                  }}
-                >
-                  <ClipboardCheck className="h-3 w-3 mr-1" />
-                  Copy Link
-                </Button>
-                <Button
-                  size="sm"
-                  className="h-6 px-2 text-xs bg-white border border-slate-200 text-slate-900 rounded-sm shadow-none"
-                  onClick={() => {
-                    setId(null)
-                  }}
-                >
-                  <FileText className="h-3 w-3 mr-1" />
-                  New Text
-                </Button>
-              </div>
-              <QRCodeCanvas
-                level={'M'}
-                marginSize={1}
-                bgColor="#ffffff"
-                fgColor="#0f172a"
-                size={300}
-                id="qrcode"
-                value={getShareUrl(id)}
-                title={getShareUrl(id)}
-                className="rounded-lg shadow-lg"
-              />
-            </div>
-          ) : (
-            <>
-              <div className="rounded-md overflow-hidden border border-slate-200 mb-2">
-                {zipFile ? (
-                    <div className="flex flex-col items-center justify-center w-full py-6 px-4 bg-white border-2 border-dashed border-slate-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium text-slate-900">{zipFile.name}</span>
-                      <span className="text-xs text-slate-600 ml-2">
-                        ({zipFile.size > 1024 * 1024
-                          ? (zipFile.size / (1024 * 1024)).toFixed(2) + ' MB'
-                          : (zipFile.size / 1024).toFixed(2) + ' KB'})
-                      </span>
-                      <button
-                        className="ml-2 text-slate-500 hover:text-red-500 transition"
-                        onClick={() => {
-                          setZipFile(null);
-                          setZipBase64('');
-                        }}
-                        aria-label="Remove file"
-                        type="button"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    <Button
-                      className="cursor-pointer h-8 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold transition-all duration-150"
-                      onClick={handleSave}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-3.5 w-3.5 mr-1" />
-                          Upload & Create Link
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="file-upload"
-                    className="flex flex-col items-center justify-center w-full h-36 cursor-pointer bg-white border-2 border-dashed border-slate-200 rounded-lg hover:bg-slate-50 transition group"
-                  >
-                    <svg
-                      className="w-10 h-10 mb-2 text-blue-600 group-hover:text-blue-700 transition"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 12l-4 4-4-4"
-                      />
-                    </svg>
-                    <span className="text-sm text-slate-900 font-medium mb-1">
-                      Click to upload ZIP file
-                    </span>
-                    <span className="text-xs text-slate-600">
-                      Only <span className="font-semibold">.zip</span> files are allowed
-                    </span>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      accept=".zip,application/zip"
-                      className="hidden"
-                      onChange={e => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const maxSize = 7 * 1024 * 1024; // 7MB in bytes
-                          if (file.size > maxSize) {
-                            toast.error('File size exceeds 10MB limit');
-                            return;
-                          }
-                          if (file.type === "application/zip" || file.name.endsWith('.zip')) {
-                            setZipFile(file);
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              setZipBase64(event.target?.result as string || '');
-                            };
-                            reader.readAsDataURL(file);
-                          } else {
-                            toast.error('Only ZIP files are allowed');
-                          }
-                        }
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
+    <KitLayout>
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center bg-slate-950 text-teal-300">
+            <ClipboardCheck className="h-4 w-4" />
+          </div>
+          <span className="text-sm font-semibold text-slate-900">Upload File</span>
+        </div>
 
-            </>
-          )}
-        </CardContent>
-      </Card>
-      {/* Info */}
-      <div className="flex justify-center mt-3">
-        <Card className="bg-white border border-slate-200 shadow-none rounded-md w-full max-w-xs">
-          <CardContent className="p-2">
-            <div className="flex items-start gap-2">
-              <ClipboardCheck className="h-4 w-4 text-green-500 mt-0.5" />
-              <div>
-                <h3 className="text-xs font-semibold text-slate-900 mb-0.5">Features</h3>
-                <ul className="text-xs text-slate-600 space-y-0.5">
-                  <li>• Share or copy file instantly</li>
-                  <li>• Download file instantly</li>
-                  <li>• File will be automatically deleted after 72 hours</li>
-                </ul>
-              </div>
+        {id ? (
+          <div className="flex flex-col items-center gap-3 border border-slate-200 bg-white px-4 py-5">
+            <span className="text-xs text-slate-500">Your file is saved at:</span>
+            <a
+              href={`/t/${id}`}
+              className="break-all border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-teal-700 transition-colors hover:border-teal-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {getShareUrl(id)}
+            </a>
+            <span className="text-[11px] text-slate-400">Will expire in 72 hours</span>
+            <div className="mt-1 flex gap-2">
+              <Button
+                size="sm"
+                className="h-8 bg-teal-600 px-3 text-xs text-white shadow-none hover:bg-teal-500"
+                onClick={() => {
+                  navigator.clipboard.writeText(getShareUrl(id))
+                  toast.success('Link copied to clipboard')
+                }}
+              >
+                <ClipboardCheck className="mr-1 h-3 w-3" />
+                Copy Link
+              </Button>
+              <Button
+                size="sm"
+                className="h-8 border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-none hover:border-teal-300"
+                onClick={() => setId(null)}
+              >
+                <FileText className="mr-1 h-3 w-3" />
+                New File
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+            <QRCodeCanvas
+              level="M"
+              marginSize={1}
+              bgColor="#ffffff"
+              fgColor="#0b1220"
+              size={220}
+              id="qrcode"
+              value={getShareUrl(id)}
+              title={getShareUrl(id)}
+              className="mt-2"
+            />
+          </div>
+        ) : zipFile ? (
+          <div className="flex flex-col items-center justify-center border border-dashed border-slate-300 bg-white px-4 py-8">
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+              <FileText className="h-5 w-5 text-teal-600" />
+              <span className="text-sm font-medium text-slate-900">{zipFile.name}</span>
+              <span className="text-xs text-slate-500">
+                ({zipFile.size > 1024 * 1024
+                  ? (zipFile.size / (1024 * 1024)).toFixed(2) + ' MB'
+                  : (zipFile.size / 1024).toFixed(2) + ' KB'})
+              </span>
+              <button
+                className="ml-1 text-slate-400 transition hover:text-red-500"
+                onClick={() => {
+                  setZipFile(null)
+                  setZipBase64('')
+                }}
+                aria-label="Remove file"
+                type="button"
+              >
+                ✕
+              </button>
+            </div>
+            <Button
+              className="h-9 bg-slate-950 text-xs font-semibold text-teal-300 shadow-none hover:bg-teal-600 hover:text-white"
+              onClick={handleSave}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <><Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />Uploading...</>
+              ) : (
+                <><Save className="mr-1 h-3.5 w-3.5" />Upload & Create Link</>
+              )}
+            </Button>
+          </div>
+        ) : (
+          <label
+            htmlFor="file-upload"
+            className="group flex h-40 w-full cursor-pointer flex-col items-center justify-center border border-dashed border-slate-300 bg-white transition hover:border-teal-400 hover:bg-teal-50/30"
+          >
+            <Upload className="mb-2 h-8 w-8 text-teal-600 transition group-hover:text-teal-700" />
+            <span className="mb-1 text-sm font-medium text-slate-900">Click to upload ZIP file</span>
+            <span className="text-xs text-slate-500">
+              Only <span className="font-semibold">.zip</span> files are allowed
+            </span>
+            <input
+              id="file-upload"
+              type="file"
+              accept=".zip,application/zip"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const maxSize = 7 * 1024 * 1024
+                  if (file.size > maxSize) {
+                    toast.error('File size exceeds 10MB limit')
+                    return
+                  }
+                  if (file.type === 'application/zip' || file.name.endsWith('.zip')) {
+                    setZipFile(file)
+                    const reader = new FileReader()
+                    reader.onload = (event) => {
+                      setZipBase64(event.target?.result as string || '')
+                    }
+                    reader.readAsDataURL(file)
+                  } else {
+                    toast.error('Only ZIP files are allowed')
+                  }
+                }
+              }}
+            />
+          </label>
+        )}
+
+        <div className="border border-slate-200 bg-slate-50/80 p-3">
+          <div className="flex items-start gap-2">
+            <ClipboardCheck className="mt-0.5 h-4 w-4 text-teal-600" />
+            <div>
+              <h3 className="mb-0.5 text-xs font-semibold text-slate-900">Features</h3>
+              <ul className="space-y-0.5 text-xs text-slate-600">
+                <li>• Share or copy file instantly</li>
+                <li>• Download file instantly</li>
+                <li>• File will be automatically deleted after 72 hours</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </KitLayout>
   )

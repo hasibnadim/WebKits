@@ -25,10 +25,8 @@ const CashOutCalculator: React.FC<CashOutCalculatorProps> = ({ title, defaultRat
   const [lastChanged, setLastChanged] = useState<Field>('initial')
   const [customRate, setCustomRate] = useState<string>('')
 
-  // Determine which rate to use
   const rate = customRate !== '' ? parseNum(customRate) / 100 : (altChecked ? altRate : defaultRate)
 
-  // Main sync logic: recalculate all fields based on the last changed field
   React.useEffect(() => {
     const init = parseNum(initialBalance)
     const withdraw = parseNum(withdrawAmount)
@@ -37,7 +35,6 @@ const CashOutCalculator: React.FC<CashOutCalculatorProps> = ({ title, defaultRat
     let newWithdraw = withdrawAmount, newClosing = closingBalance, newReceive = receiveCash
 
     if (lastChanged === 'initial') {
-      // recalc withdraw, closing, receive
       if (withdrawAmount) {
         newClosing = (init - withdraw).toString()
         newReceive = (withdraw - withdraw * rate > 0 ? (withdraw - withdraw * rate).toFixed(2) : '')
@@ -46,7 +43,6 @@ const CashOutCalculator: React.FC<CashOutCalculatorProps> = ({ title, defaultRat
         const w = parseNum(newWithdraw)
         newReceive = (w - w * rate > 0 ? (w - w * rate).toFixed(2) : '')
       } else if (receiveCash) {
-        // receive = withdraw - withdraw*rate => withdraw = receive/(1-rate)
         const w = rate < 1 ? receive / (1 - rate) : 0
         newWithdraw = w > 0 ? w.toFixed(2) : ''
         newClosing = (init - w).toString()
@@ -59,28 +55,23 @@ const CashOutCalculator: React.FC<CashOutCalculatorProps> = ({ title, defaultRat
       const w = parseNum(newWithdraw)
       newReceive = (w - w * rate > 0 ? (w - w * rate).toFixed(2) : '')
     } else if (lastChanged === 'receive') {
-      // receive = withdraw - withdraw*rate => withdraw = receive/(1-rate)
       const w = rate < 1 ? receive / (1 - rate) : 0
       newWithdraw = w > 0 ? w.toFixed(2) : ''
       newClosing = (init - w).toString()
     }
 
-    // Only update if values have changed to avoid loops
     if (newWithdraw !== withdrawAmount) setWithdrawAmount(newWithdraw)
     if (newClosing !== closingBalance) setClosingBalance(newClosing)
     if (newReceive !== receiveCash) setReceiveCash(newReceive)
-    // initialBalance is only updated by user
   // eslint-disable-next-line
   }, [initialBalance, withdrawAmount, closingBalance, receiveCash, rate, lastChanged])
 
-  // Max Withdraw button
   const handleMaxWithdraw = () => {
     setWithdrawAmount(initialBalance)
     setClosingBalance('0')
     setLastChanged('withdraw')
   }
 
-  // Reset button
   const handleReset = () => {
     setInitialBalance('')
     setWithdrawAmount('')
@@ -91,113 +82,119 @@ const CashOutCalculator: React.FC<CashOutCalculatorProps> = ({ title, defaultRat
     setLastChanged('initial')
   }
 
-  // Fee calculation
   const withdraw = parseNum(withdrawAmount)
   const fee = withdraw * rate
 
+  const inputClass =
+    "border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-50"
+
   return (
-    <div className="p-2">
-      <div className="bg-white/90 border border-slate-200 rounded-xl shadow-md p-4 space-y-4 transition-all max-w-md mx-auto">
-        <div className="flex items-center gap-2 mb-2">
-          <CreditCard className="h-4 w-4 text-blue-600" />
-          <span className="font-semibold text-slate-900 text-sm">{title}</span>
+    <div className="mx-auto max-w-md space-y-4 border border-slate-200 bg-white p-4">
+      <div className="mb-1 flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center bg-slate-950 text-teal-300">
+          <CreditCard className="h-3.5 w-3.5" />
+        </div>
+        <span className="text-sm font-semibold text-slate-900">{title}</span>
+        <button
+          onClick={handleReset}
+          className="ml-auto p-1 text-slate-400 transition hover:bg-slate-100 hover:text-teal-700"
+          title="Reset"
+          type="button"
+        >
+          <RefreshCcw className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-1.5">
+        <label className="text-xs font-medium text-slate-600">Initial Balance</label>
+        <input
+          type="number"
+          min="0"
+          value={initialBalance}
+          onChange={e => { setInitialBalance(e.target.value); setLastChanged('initial') }}
+          className={inputClass}
+          placeholder="0"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-slate-600">Withdraw Amount</label>
           <button
-            onClick={handleReset}
-            className="ml-auto p-1 rounded hover:bg-slate-100 transition"
-            title="Reset"
             type="button"
+            onClick={handleMaxWithdraw}
+            className="bg-teal-600 px-2 py-1 text-xs font-medium text-white transition hover:bg-teal-500"
           >
-            <RefreshCcw className="h-4 w-4 text-gray-600" />
+            Max Withdraw
           </button>
         </div>
-        <div className="grid grid-cols-1 gap-2">
-          <label className="text-xs text-slate-700 font-medium">Initial Balance</label>
+        <input
+          type="number"
+          min="0"
+          value={withdrawAmount}
+          onChange={e => { setWithdrawAmount(e.target.value); setLastChanged('withdraw') }}
+          className={inputClass}
+          placeholder="0"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-1.5">
+        <label className="text-xs font-medium text-slate-600">Closing Balance</label>
+        <input
+          type="number"
+          min="0"
+          value={closingBalance}
+          onChange={e => { setClosingBalance(e.target.value); setLastChanged('closing') }}
+          className={inputClass}
+          placeholder="0"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-1.5">
+        <label className="text-xs font-medium text-slate-600">Receive Cash</label>
+        <input
+          type="number"
+          min="0"
+          value={receiveCash}
+          onChange={e => { setReceiveCash(e.target.value); setLastChanged('receive') }}
+          className={inputClass}
+          placeholder="0"
+        />
+      </div>
+
+      <div className="mt-1 flex flex-wrap items-center gap-4">
+        <label className="inline-flex items-center gap-1.5 text-xs text-slate-700">
           <input
-            type="number"
-            min="0"
-            value={initialBalance}
-            onChange={e => { setInitialBalance(e.target.value); setLastChanged('initial') }}
-            className="rounded-md border border-slate-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 placeholder:text-slate-400"
-            placeholder="0"
+            type="checkbox"
+            checked={altChecked}
+            onChange={e => setAltChecked(e.target.checked)}
+            className="h-3.5 w-3.5 accent-teal-600"
           />
-        </div>
-        <div className="grid grid-cols-1 gap-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-slate-700 font-medium">Withdraw Amount</label>
-            <button
-              type="button"
-              onClick={handleMaxWithdraw}
-              className="px-2 py-1 text-xs rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
-            >Max Withdraw</button>
-          </div>
-          <input
-            type="number"
-            min="0"
-            value={withdrawAmount}
-            onChange={e => { setWithdrawAmount(e.target.value); setLastChanged('withdraw') }}
-            className="rounded-md border border-slate-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 placeholder:text-slate-400"
-            placeholder="0"
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-2">
-          <label className="text-xs text-slate-700 font-medium">Closing Balance</label>
-          <input
-            type="number"
-            min="0"
-            value={closingBalance}
-            onChange={e => { setClosingBalance(e.target.value); setLastChanged('closing') }}
-            className="rounded-md border border-slate-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 placeholder:text-slate-400"
-            placeholder="0"
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-2">
-          <label className="text-xs text-slate-700 font-medium">Receive Cash</label>
-          <input
-            type="number"
-            min="0"
-            value={receiveCash}
-            onChange={e => { setReceiveCash(e.target.value); setLastChanged('receive') }}
-            className="rounded-md border border-slate-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 placeholder:text-slate-400"
-            placeholder="0"
-          />
-        </div>
-        <div className="flex items-center gap-4 mt-1">
-          <label className="inline-flex items-center gap-1 text-xs text-slate-700">
-            <input
-              type="checkbox"
-              checked={altChecked}
-              onChange={e => setAltChecked(e.target.checked)}
-              className="accent-blue-500 h-3.5 w-3.5 rounded"
-            />
-            {altLabel}
-          </label>
-          <span className="text-xs text-slate-600 flex items-center gap-1">
+          {altLabel}
+        </label>
+        <span className="flex items-center gap-1 text-xs text-slate-600">
           Charge:
-            <input
-              type="number"
-              min="0"
-              step="0.0001"
-              value={customRate !== '' ? customRate : ''}
-              onChange={e => {
-                // Store as percent string, but use as decimal in calculations
-                setCustomRate(e.target.value)
-              }}
-              placeholder={((altChecked ? altRate : defaultRate) * 100).toFixed(2)}
-              className="w-14 px-1 py-0.5 text-xs border border-slate-200 rounded bg-white text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-              style={{ minWidth: 0 }}
-            />
-            <span className="text-xs text-slate-600">%</span>
-          </span>
-        </div>
-        <div className="bg-white/50 border border-slate-200 rounded-lg p-3 mt-2 text-xs space-y-1 shadow-sm transition-all">
-          <div className="flex items-center gap-1 text-slate-900">
-            <span>Fee :</span>
-            <span className="font-semibold">{fee > 0 ? fee.toFixed(4) : '0.0000'} ৳</span>
-          </div>
+          <input
+            type="number"
+            min="0"
+            step="0.0001"
+            value={customRate !== '' ? customRate : ''}
+            onChange={e => setCustomRate(e.target.value)}
+            placeholder={((altChecked ? altRate : defaultRate) * 100).toFixed(2)}
+            className="w-14 border border-slate-200 bg-white px-1 py-0.5 text-right text-xs font-semibold text-slate-900 focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-50"
+          />
+          <span>%</span>
+        </span>
+      </div>
+
+      <div className="border border-slate-200 bg-slate-50 p-3 text-xs">
+        <div className="flex items-center gap-1 text-slate-900">
+          <span>Fee :</span>
+          <span className="font-semibold text-teal-700">{fee > 0 ? fee.toFixed(4) : '0.0000'} ৳</span>
         </div>
       </div>
     </div>
   )
 }
 
-export default CashOutCalculator 
+export default CashOutCalculator

@@ -1,116 +1,110 @@
 "use client";
-import {
-  DraftingCompass,
-  Menu,
-  X,
-} from "lucide-react";
+import { DraftingCompass, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Playwrite_US_Modern } from "next/font/google";
+import { Playwrite_US_Modern, Space_Grotesk } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 const playWrite = Playwrite_US_Modern({
   weight: ["400"],
 });
-const navLinks = [
 
-  {
-    href: "/kit",
-    icon: DraftingCompass,
-    label: "Kits",
-  },
+const nav = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
+
+const navLinks = [
+  { href: "/kit", label: "Kits" },
+  { href: "/about", label: "About" },
 ];
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileMode, setIsMobileMode] = useState(false);
+
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobileMode(window.innerWidth < 768);
-    };
+    const handleResize = () => setIsMobileMode(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMobileMenuOpen]);
+
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 backdrop-blur-xl bg-white/90 text-slate-900",
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-4 px-2 md:px-4 lg:px-1">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-0 group">
-            <span
-              className={`${playWrite.className} font-bold text-lg bg-gradient-to-r from-gray-800 to-blue-600 bg-clip-text text-transparent`}
-            >
-              WebKits
-            </span>
-          </Link>
+    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-[#f8fbfd]/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:h-16">
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden border border-teal-500/30 bg-slate-950">
+            <span className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(45,212,191,0.45),transparent_65%)]" />
+            <DraftingCompass className="relative h-3.5 w-3.5 text-teal-300" />
+          </span>
+          <span
+            className={`${playWrite.className} text-lg tracking-tight text-slate-900 transition-colors group-hover:text-teal-700`}
+          >
+            WebKits
+          </span>
+        </Link>
 
-          {/* Mobile Nav */}
-          <div className="flex items-center gap-1 md:gap-3"> 
-            {!isMobileMode && (
-              <div className="hidden md:flex">
-                {navLinks.map((link) => (
-                  <Button
-                    key={link.href}
-                    asChild
-                    variant="ghost"
-                    className="hover:text-blue-600"
-                    aria-label={link.label}
-                  >
-                    <Link href={link.href}>
-                      <link.icon className="h-4 w-4" />
-                      <span>{link.label}</span>
-                    </Link>
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            {isMobileMode && (
-              <Popover
-                open={isMobileMenuOpen}
-                onOpenChange={setIsMobileMenuOpen}
+        {!isMobileMode && (
+          <nav className={`${nav.className} hidden items-center gap-1 md:flex`}>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-teal-700"
               >
-                <PopoverTrigger asChild className="md:hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  >
-                    {isMobileMenuOpen ? (
-                      <X className="h-6 w-6" />
-                    ) : (
-                      <Menu className="h-6 w-6" />
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {isMobileMode && (
+          <div className="relative md:hidden">
+            <button
+              type="button"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center border border-slate-200 bg-white/70 text-slate-700 transition-colors hover:border-teal-300 hover:text-teal-700"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+            {isMobileMenuOpen && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Close menu overlay"
+                  className="fixed inset-0 z-40 bg-slate-950/20 backdrop-blur-[1px]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
+                <div
+                  className={`${nav.className} absolute right-0 top-full z-50 mt-2 w-44 border border-slate-200 bg-white/95 p-1.5 shadow-sm backdrop-blur-xl`}
+                >
                   {navLinks.map((link) => (
-                    <Button
+                    <Link
                       key={link.href}
-                      asChild
-                      variant="ghost"
-                      className="flex gap-3 justify-start"
-                      aria-label={link.label}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-700"
                     >
-                      <Link href={link.href}>
-                        <link.icon className="h-4 w-4" />
-                        <span>{link.label}</span>
-                      </Link>
-                    </Button>
+                      {link.label}
+                    </Link>
                   ))}
-                </PopoverContent>
-              </Popover>
+                </div>
+              </>
             )}
           </div>
-        </div>
+        )}
       </div>
     </header>
   );

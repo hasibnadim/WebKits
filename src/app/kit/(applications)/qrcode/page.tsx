@@ -3,13 +3,13 @@ import { Metadata } from "next";
 import KitLayout from "@/components/KitLayout";
 
 export const metadata: Metadata = {
-  title: "QR Code Generator/Scanner",
-  description: "Generate/Scan QR Code",
+  title: "QR Code Generator",
+  description: "Generate custom QR codes",
 };
 
 export default function QRCodePage() {
   return (
-    <KitLayout title="QR Code Generator" description="Create custom QR codes with advanced styling options" category="General Kit">
+    <KitLayout>
       <div className="flex justify-center">
         <QRapp />
       </div>

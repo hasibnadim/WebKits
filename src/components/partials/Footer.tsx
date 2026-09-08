@@ -1,48 +1,48 @@
-import { Package } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { Space_Grotesk } from "next/font/google";
+
+const display = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
 
 const Footer = () => {
   return (
-    <footer className="backdrop-blur-xl bg-white/95 border-t border-slate-200/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-xs">
-          {/* Brand */}
-          <div className="flex flex-col gap-2 items-start">
-            <div className="flex items-center justify-center gap-2">
-              <Package className="w-3 h-3 text-white bg-gradient-to-br from-purple-600 to-blue-600 rounded-md" />
-              <span className="font-semibold text-xs text-slate-900">
-                WebKits
-              </span>
-            </div>
-            <span className="text-xs text-slate-600">
-              Free online tools for developers and creators
-            </span>
-          </div>
-          {/* Info Links */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/about"
-              className="text-slate-600 hover:text-blue-600 transition-colors"
-            >
-              About
-            </Link>
-          </div>
-          {/* Copyright */}
-          <div className="flex items-center gap-2 text-[11px] text-slate-600">
-            <span>
-              Developed and Maintained By{" "}
-              <a
-                href="https://www.linkedin.com/in/hasibnadim"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-blue-600 hover:underline underline-offset-2"
-              >
-                H.Nadim
-              </a>
-            </span>
-          </div>
+    <footer className="relative overflow-hidden border-t border-slate-200/80 bg-slate-950 text-slate-300">
+      <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:linear-gradient(to_right,rgba(45,212,191,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(45,212,191,0.12)_1px,transparent_1px)] [background-size:40px_40px] [mask-image:linear-gradient(to_top,black,transparent)]" />
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 md:flex-row md:items-end md:justify-between md:py-10">
+        <div>
+          <Link
+            href="/"
+            className={`${display.className} text-lg font-semibold tracking-tight text-white transition-colors hover:text-teal-300`}
+          >
+            Web<span className="text-teal-400">Kits</span>
+          </Link>
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-slate-400">
+            Free online tools for developers and creators.
+          </p>
         </div>
+
+        <div className={`${display.className} flex items-center gap-5 text-sm`}>
+          <Link href="/kit" className="text-slate-400 transition-colors hover:text-teal-300">
+            Kits
+          </Link>
+          <Link href="/about" className="text-slate-400 transition-colors hover:text-teal-300">
+            About
+          </Link>
+        </div>
+
+        <p className="text-[11px] text-slate-500">
+          Built by{" "}
+          <a
+            href="https://hnadim.web.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-teal-400/90 transition-colors hover:text-teal-300"
+          >
+            H.Nadim
+          </a>
+        </p>
       </div>
     </footer>
   );

@@ -1,63 +1,86 @@
 "use client";
 import Link from "next/link";
-import applications from "@/lib/applications";
-import { ArrowRight, Layers, Grid3X3, Wrench } from "lucide-react";
+import { getAllTools } from "@/lib/applications";
+import { ArrowUpRight } from "lucide-react";
+import { Space_Grotesk } from "next/font/google";
 
-const categoryIcons: Record<string, typeof Layers> = {
-  "General Kit": Layers,
-  "Conversion Kit": Grid3X3,
-  "Developer Suite": Wrench,
-};
+const display = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
 
 export default function SuggestedKits({
-  currentName,
+  currentId,
   category,
 }: {
-  currentName: string;
+  currentId?: string;
   category?: string;
 }) {
-  const all = Object.entries(applications).flatMap(([cat, tools]) =>
-    tools.map((t) => ({ ...t, category: cat })),
+  const all = getAllTools();
+  const sameCategory = all.filter(
+    (t) => t.category === category && t.id !== currentId,
   );
-
-  const sameCategory = all.filter((t) => t.category === category && t.name !== currentName);
-  const others = all.filter((t) => t.category !== category && t.name !== currentName);
-
+  const others = all.filter(
+    (t) => t.category !== category && t.id !== currentId,
+  );
   const suggestions = [...sameCategory, ...others].slice(0, 4);
 
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="border-t border-gray-100 mt-4 pt-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="mt-8 border-t border-slate-200/90 pt-6">
+      <div className="mb-4 flex items-end justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">Related Tools</h3>
-          <p className="text-xs text-gray-500 mt-0.5">You might also find these useful</p>
+          <h3 className={`${display.className} text-sm font-semibold text-slate-900`}>
+            Related kits
+          </h3>
+          <p className="mt-0.5 text-xs text-slate-500">Continue with another tool</p>
         </div>
         <Link
           href="/kit"
-          className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          className="text-xs font-medium text-teal-700 transition-colors hover:text-teal-600"
         >
           View all
         </Link>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {suggestions.map((tool) => {
-          const CatIcon = tool.icon;
+          const className =
+            "group flex min-h-[96px] flex-col justify-between border border-slate-200/90 bg-white/70 p-3 transition-all hover:-translate-y-0.5 hover:border-teal-400 hover:bg-teal-50/40";
+          const content = (
+            <>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex h-8 w-8 items-center justify-center bg-slate-950 text-teal-300 transition-colors group-hover:bg-teal-600 group-hover:text-white">
+                  <tool.icon className="h-3.5 w-3.5" />
+                </div>
+                <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 transition-colors group-hover:text-teal-600" />
+              </div>
+              <div>
+                <p className={`${display.className} truncate text-xs font-semibold text-slate-900`}>
+                  {tool.name}
+                </p>
+                <p className="mt-0.5 text-[10px] text-slate-400">{tool.category}</p>
+              </div>
+            </>
+          );
+
+          if (tool.external) {
+            return (
+              <a
+                key={tool.id}
+                href={tool.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={className}
+              >
+                {content}
+              </a>
+            );
+          }
+
           return (
-            <Link
-              key={tool.name}
-              href={tool.link}
-              className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:shadow-sm hover:bg-blue-50/20 transition-all duration-200"
-            >
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 shrink-0">
-                <CatIcon className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-gray-900 truncate">{tool.name}</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">{tool.category}</p>
-              </div>
-              <ArrowRight className="h-3 w-3 text-gray-300 shrink-0" />
+            <Link key={tool.id} href={tool.link} className={className}>
+              {content}
             </Link>
           );
         })}
