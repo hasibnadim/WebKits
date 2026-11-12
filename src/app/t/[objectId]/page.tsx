@@ -31,7 +31,7 @@ const Page = async ({ params }: { params: Promise<{ objectId: string }> }) => {
         if (obj.text) {
             return (
                     <div className="rounded-md overflow-hidden border border-slate-200 mb-2 bg-white">
-                        <ShowText text={obj.text} language={obj.language} />
+                        <ShowText text={obj.text} language={obj.language} id={objectId} />
                     </div>
             )
         } else if (obj.file) {

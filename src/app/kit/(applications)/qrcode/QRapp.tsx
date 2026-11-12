@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { useSearchParams } from 'next/navigation'
 
 export default function QRapp() {
     const [value, setValue] = useState("https://www.google.com")
@@ -17,7 +18,13 @@ export default function QRapp() {
     const [QRbgColor, setQRbgColor] = useState("#FFFFFF")
     const [QRfgColor, setQRfgColor] = useState("#0b1220")
     const [QRmarginSize, setQRmarginSize] = useState(2)
-
+    const router = useSearchParams()
+    useEffect(() => {
+        const c = router.get("content")
+        if (c) {
+            setValue(c)
+        }
+    }, [router])
     useEffect(() => {
         const bytes = new TextEncoder().encode(value).length
         if (bytes > 1500) {
